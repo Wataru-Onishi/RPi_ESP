@@ -1,7 +1,7 @@
 from dynamixel_sdk import *                    # Dynamixel SDKのインポート
 
 # Dynamixelの設定
-DXL_ID = 1                                     # Dynamixel ID
+DXL_ID = 2                                     # Dynamixel ID
 BAUDRATE = 57600                               # Dynamixelのボーレート
 DEVICENAME = '/dev/ttyUSB0'                    # ポート名
 PROTOCOL_VERSION = 2.0                         # 使用するプロトコルバージョン
