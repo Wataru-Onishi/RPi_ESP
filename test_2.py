@@ -28,7 +28,7 @@ if not dxl_portHandler.setBaudRate(BAUDRATE):
     quit()
 
 # Initialize and open the serial port for receiving commands
-ser = serial.Serial('/dev/ttyUSB1', 57600, timeout=1)  # Adjust serial port
+ser = serial.Serial('/dev/ttyUSB2', 57600, timeout=1)  # Adjust serial port
 print("Serial port opened for commands")
 
 while True:
