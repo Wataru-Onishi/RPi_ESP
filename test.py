@@ -6,7 +6,7 @@ from dynamixel_sdk import *  # Uses Dynamixel SDK library
 import time  # for time.sleep()
 
 # Serial port settings
-SERIAL_PORT = '/dev/ttyUSB1'  # Adjust this to your serial port
+SERIAL_PORT = '/dev/ttyUSB0'  # Adjust this to your serial port
 SERIAL_BAUDRATE = 57600
 
 # Dynamixel settings
@@ -20,7 +20,7 @@ ADDR_GOAL_VELOCITY = 104
 OPERATING_MODE_VELOCITY = 1
 DXL_IDS = [1, 2, 3, 4]
 DXL_MOVING_SPEED = 200  # Adjust speed here
-DEVICENAME = '/dev/ttyUSB0'
+DEVICENAME = '/dev/ttyUSB1'
 PROTOCOL_VERSION = 2.0
 BAUDRATE = 57600
 
