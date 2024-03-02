@@ -12,14 +12,14 @@ void setup() {
 void loop() {
     while(true){
       if (PS4.Up()){ 
-        Serial.println("Square Button");
+        Serial.println("Up Button");
         Serial.write("0");
-        delay(1000);
+        delay(100);
       }
       if (PS4.Cross()){
         Serial.println("Cross Button");
         Serial.write("1");
-        delay(1000);
+        delay(100);
       }
       if (PS4.Circle()) Serial.println("Circle Button");
       if (PS4.Triangle()) Serial.println("Triangle Button");
