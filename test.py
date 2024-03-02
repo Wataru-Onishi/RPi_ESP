@@ -22,8 +22,8 @@ dxl_packetHandler = PacketHandler(PROTOCOL_VERSION)
 dxl_base_speeds = {
     1: 100,  # Base speed for motor ID 1
     2: 100,  # Base speed for motor ID 2
-    3: 100,  # Base speed for motor ID 3
-    4: 100   # Base speed for motor ID 4
+    3: -100,  # Base speed for motor ID 3
+    4: -100   # Base speed for motor ID 4
 }
 
 # Open the Dynamixel port
