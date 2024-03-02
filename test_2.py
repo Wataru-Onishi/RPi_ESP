@@ -8,7 +8,7 @@ ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
 OPERATING_MODE_VELOCITY = 1
 BAUDRATE = 57600
-DEVICENAME = '/dev/ttyUSB0'
+DEVICENAME = '/dev/ttyUSB1'
 PROTOCOL_VERSION = 2.0
 
 # Initialize PortHandler and PacketHandler instances for Dynamixel
@@ -28,7 +28,7 @@ if not dxl_portHandler.setBaudRate(BAUDRATE):
     quit()
 
 # Initialize and open the serial port for receiving commands
-ser = serial.Serial('/dev/ttyUSB2', 57600, timeout=1)  # Adjust serial port
+ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1)  # Adjust serial port
 print("Serial port opened for commands")
 
 while True:
