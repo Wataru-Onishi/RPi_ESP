@@ -2,14 +2,18 @@ import serial
 from dynamixel_sdk import *  # Uses Dynamixel SDK library
 import time
 
+# Serial port settings
+SERIAL_PORT = '/dev/ttyUSB1'
+SERIAL_BAUDRATE = 57600
+
 # Dynamixel settings
 ADDR_TORQUE_ENABLE = 64
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
 OPERATING_MODE_VELOCITY = 1
-BAUDRATE = 57600
-DEVICENAME = '/dev/ttyUSB1'
+DEVICENAME = '/dev/ttyUSB0'
 PROTOCOL_VERSION = 2.0
+BAUDRATE = 57600
 
 # Initialize PortHandler and PacketHandler instances for Dynamixel
 dxl_portHandler = PortHandler(DEVICENAME)
@@ -28,7 +32,7 @@ if not dxl_portHandler.setBaudRate(BAUDRATE):
     quit()
 
 # Initialize and open the serial port for receiving commands
-ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=1)  # Adjust serial port
+ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1)
 print("Serial port opened for commands")
 
 while True:
@@ -39,13 +43,11 @@ while True:
             try:
                 dxl_id = int(parts[0])  # Extract Dynamixel ID
                 dxl_speed = int(parts[1])  # Extract speed
-                
+
                 # Set to velocity control mode
                 dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
-                
                 # Enable torque
                 dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
-                
                 # Set goal velocity
                 dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, dxl_speed)
                 print(f"Motor {dxl_id} set to speed {dxl_speed}")
