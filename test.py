@@ -14,13 +14,13 @@ OPERATING_MODE_VELOCITY = 1  # Value for velocity control mode
 PROTOCOL_VERSION = 2.0  # See which protocol version is used in the Dynamixel
 
 # Default setting
-DXL_IDS = [0, 1, 2, 3, 4]  # Dynamixel IDs : 0 to 4
+DXL_IDS = [0, 1, 2, 3]  # Dynamixel IDs : 0 to 3
 BAUDRATE = 57600  # Dynamixel default baudrate : 57600
 DEVICENAME = '/dev/ttyUSB0'  # Check which port is being used on your controller
 
 TORQUE_ENABLE = 1  # Value for enabling the torque
 TORQUE_DISABLE = 0  # Value for disabling the torque
-DXL_MOVING_SPEED = 200  # Dynamixel moving speed for continuous rotation
+DXL_MOVING_SPEED = 100  # Dynamixel moving speed for continuous rotation
 
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
