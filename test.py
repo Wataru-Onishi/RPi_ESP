@@ -1,76 +1,66 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import serial
 from dynamixel_sdk import *  # Uses Dynamixel SDK library
 import time  # for time.sleep()
 
-# Control table address for Dynamixel X series
+# Serial port settings
+SERIAL_PORT = '/dev/ttyUSB1'  # Adjust this to your serial port
+SERIAL_BAUDRATE = 57600
+
+# Dynamixel settings
 ADDR_TORQUE_ENABLE = 64
-ADDR_OPERATING_MODE = 11  # Operating mode address
-ADDR_GOAL_VELOCITY = 104  # Goal velocity address
-OPERATING_MODE_VELOCITY = 1  # Value for velocity control mode
+ADDR_OPERATING_MODE = 11
+ADDR_GOAL_VELOCITY = 104
+OPERATING_MODE_VELOCITY = 1
+DXL_IDS = [1, 2, 3, 4]
+DXL_MOVING_SPEED = 200  # Adjust speed here
+DEVICENAME = '/dev/ttyUSB0'
+PROTOCOL_VERSION = 2.0
+BAUDRATE = 57600
 
-# Protocol version
-PROTOCOL_VERSION = 2.0  # See which protocol version is used in the Dynamixel
+# Initialize PortHandler and PacketHandler instances for Dynamixel
+dxl_portHandler = PortHandler(DEVICENAME)
+dxl_packetHandler = PacketHandler(PROTOCOL_VERSION)
 
-# Default setting
-DXL_IDS = [0, 1, 2, 3]  # Dynamixel IDs : 0 to 3
-BAUDRATE = 57600  # Dynamixel default baudrate : 57600
-DEVICENAME = '/dev/ttyUSB0'  # Check which port is being used on your controller
-
-TORQUE_ENABLE = 1  # Value for enabling the torque
-TORQUE_DISABLE = 0  # Value for disabling the torque
-DXL_MOVING_SPEED = 100  # Dynamixel moving speed for continuous rotation
-
-# Initialize PortHandler instance
-portHandler = PortHandler(DEVICENAME)
-
-# Initialize PacketHandler instance
-packetHandler = PacketHandler(PROTOCOL_VERSION)
-
-# Open port
-if portHandler.openPort():
-    print("Succeeded to open the port")
+# Open the Dynamixel port
+if dxl_portHandler.openPort():
+    print("Dynamixel port opened successfully")
 else:
-    print("Failed to open the port")
+    print("Failed to open the Dynamixel port")
     quit()
 
-# Set port baudrate
-if not portHandler.setBaudRate(BAUDRATE):
-    print("Failed to change the baudrate")
+# Set Dynamixel port baudrate
+if not dxl_portHandler.setBaudRate(BAUDRATE):
+    print("Failed to change the Dynamixel baudrate")
     quit()
 
-# Change to velocity control mode and enable torque for all motors
-for DXL_ID in DXL_IDS:
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
-    if dxl_comm_result != COMM_SUCCESS:
-        print(f"Failed to change operating mode to velocity control for DXL ID: {DXL_ID}")
-        continue
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-    if dxl_comm_result != COMM_SUCCESS:
-        print(f"Failed to enable torque for DXL ID: {DXL_ID}")
-        continue
+# Initialize and open the serial port for receiving commands
+ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1)
+print("Serial port opened for commands")
 
-# Set goal velocity for all motors
-for DXL_ID in DXL_IDS:
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VELOCITY, DXL_MOVING_SPEED)
-    if dxl_comm_result != COMM_SUCCESS:
-        print(f"Failed to set goal velocity for DXL ID: {DXL_ID}")
-        continue
+while True:
+    if ser.in_waiting > 0:
+        command = ser.read().decode('utf-8')
 
-print("All Dynamixels are now rotating")
-time.sleep(5)  # Rotate for 5 seconds
+        if command == '1':
+            print("Command to rotate received")
+            for DXL_ID in DXL_IDS:
+                # Set to velocity control mode
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, DXL_ID, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                # Enable torque
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+                # Set goal velocity
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, DXL_ID, ADDR_GOAL_VELOCITY, DXL_MOVING_SPEED)
 
-# Stop rotation and disable torque for all motors
-for DXL_ID in DXL_IDS:
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VELOCITY, 0)
-    if dxl_comm_result != COMM_SUCCESS:
-        print(f"Failed to stop the Dynamixel with ID: {DXL_ID}")
-        continue
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-    if dxl_comm_result != COMM_SUCCESS:
-        print(f"Failed to disable torque for DXL ID: {DXL_ID}")
-        continue
+        elif command == '2':
+            print("Command to stop received")
+            for DXL_ID in DXL_IDS:
+                # Set goal velocity to 0 to stop
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, DXL_ID, ADDR_GOAL_VELOCITY, 0)
+                # Disable torque
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
 
-# Close port
-portHandler.closePort()
+# Close the Dynamixel port
+dxl_portHandler.closePort()
