@@ -10,34 +10,46 @@ void setup() {
 }
 
 void loop() {
-    // while(true){
-    //   if (PS4.Up()){ 
-    //     Serial.println("Up Button");
-    //     Serial.write("0");
-    //     delay(100);
-    //   }
-    //   if (PS4.Cross()){
-    //     Serial.println("Cross Button");
-    //     Serial.write("1");
-    //     delay(100);
-    //   }
+  //   while(true){
+  //     if (PS4.Cross()){ 
+  //       Serial.println("Cross Button");
+  //       Serial.write("0");
+  //       delay(100);
+  //     }
+  //     if (PS4.Up()){
+  //       Serial.println("Up Button");
+  //       Serial.write("1");
+  //       delay(100);
+  //     }
+  //     if (PS4.Down()){
+  //       Serial.println("Down Button");
+  //       Serial.write("2");
+  //       delay(100);
+  //     }
+  // }
 
     while(true){
-      if (PS4.Up()){ 
-        Serial.println("Up Button");
-        Serial.write("0,100");
-        Serial.write("1,100");
-        delay(100);
-      }
-      if (PS4.Cross()){
+      if (PS4.Cross()){ 
         Serial.println("Cross Button");
-        Serial.write("0,0");
-        Serial.write("1,0");
+        Serial.write("1:0");
+        Serial.write("2:0");
+        Serial.write("3:0");
         delay(100);
       }
-
-
-
+      if (PS4.Up()){
+        Serial.println("Up Button");
+        Serial.write("1:100");
+        Serial.write("2:100");
+        Serial.write("3:100");
+        delay(100);
+      }
+      if (PS4.Down()){
+        Serial.println("Down Button");
+        Serial.write("1:-100");
+        Serial.write("2:-100");
+        Serial.write("3:-100");
+        delay(100);
+      }
   }
 
 
