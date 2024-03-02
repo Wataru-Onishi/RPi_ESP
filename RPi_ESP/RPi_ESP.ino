@@ -11,7 +11,7 @@ void setup() {
 
 void loop() {
     while(true){
-      if (PS4.Square()){ 
+      if (PS4.Up()){ 
         Serial.println("Square Button");
         Serial.write("0");
         delay(1000);
