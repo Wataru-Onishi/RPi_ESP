@@ -48,7 +48,7 @@ while True:
     if ser.in_waiting > 0:
         command = ser.read().decode('utf-8')
 
-        if command == '1':
+        if command == '0':
             print("Command to rotate received")
             for DXL_ID in DXL_IDS:
                 # Set to velocity control mode
@@ -58,7 +58,7 @@ while True:
                 # Set goal velocity
                 dxl_packetHandler.write4ByteTxRx(dxl_portHandler, DXL_ID, ADDR_GOAL_VELOCITY, DXL_MOVING_SPEED)
 
-        elif command == '2':
+        elif command == '1':
             print("Command to stop received")
             for DXL_ID in DXL_IDS:
                 # Set goal velocity to 0 to stop
