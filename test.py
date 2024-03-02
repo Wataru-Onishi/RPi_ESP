@@ -10,6 +10,10 @@ SERIAL_PORT = '/dev/ttyUSB1'  # Adjust this to your serial port
 SERIAL_BAUDRATE = 57600
 
 # Dynamixel settings
+# これらの行をプログラムの適切な場所（通常は他の定義の近く）に追加します
+TORQUE_ENABLE = 1     # トルクを有効にするための値
+TORQUE_DISABLE = 0    # トルクを無効にするための値
+
 ADDR_TORQUE_ENABLE = 64
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
