@@ -1,67 +1,77 @@
-from dynamixel_sdk import *                    # Dynamixel SDKのインポート
-import time                                    # タイマー機能のためのインポート
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# Dynamixelの設定値
-DXL_ID = 1                                     # Dynamixel ID
-BAUDRATE = 57600                               # Dynamixelのボーレート
-DEVICENAME = '/dev/ttyUSB0'                    # ポート名（環境に合わせて変更）
-PROTOCOL_VERSION = 2.0                         # 使用するプロトコルバージョン
+from dynamixel_sdk import *                    # Uses Dynamixel SDK library
+import time                                    # for time.sleep()
 
-# XL430-W250のコントロールテーブルアドレス
-ADDR_XL430_OPERATING_MODE = 11                 # 動作モードのアドレス
-ADDR_XL430_GOAL_VELOCITY = 104                 # 目標速度のアドレス
-VELOCITY_CONTROL_MODE = 1                      # 速度制御モード
+# Control table address for Dynamixel X series
+ADDR_TORQUE_ENABLE      = 64
+ADDR_OPERATING_MODE     = 11                   # Operating mode address
+ADDR_GOAL_VELOCITY      = 104                  # Goal velocity address
+OPERATING_MODE_VELOCITY = 1                    # Value for velocity control mode
 
-# サーボモーターの速度設定（範囲：-1023～1023）
-DXL_MOVING_SPEED = 200                         # サーボが回転する速度
+# Protocol version
+PROTOCOL_VERSION = 2.0                         # See which protocol version is used in the Dynamixel
 
-# ポートの初期化
+# Default setting
+DXL_ID = 1                                      # Dynamixel ID : 1
+BAUDRATE = 57600                                # Dynamixel default baudrate : 57600
+DEVICENAME = '/dev/ttyUSB0'                     # Check which port is being used on your controller
+
+TORQUE_ENABLE = 1                               # Value for enabling the torque
+TORQUE_DISABLE = 0                              # Value for disabling the torque
+DXL_MOVING_SPEED = 200                          # Dynamixel moving speed for continuous rotation
+
+# Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
+
+# Initialize PacketHandler instance
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
-# ポートのオープン
+# Open port
 if portHandler.openPort():
     print("Succeeded to open the port")
 else:
     print("Failed to open the port")
     quit()
 
-# ボーレートの設定
-if portHandler.setBaudRate(BAUDRATE):
-    print("Succeeded to change the baudrate")
-else:
+# Set port baudrate
+if not portHandler.setBaudRate(BAUDRATE):
     print("Failed to change the baudrate")
     quit()
 
-# 動作モードの設定（速度制御モード）
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_XL430_OPERATING_MODE, VELOCITY_CONTROL_MODE)
+# Change to velocity control mode
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
 if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Operating mode changed to velocity control mode")
+    print("Failed to change operating mode to velocity control")
+    quit()
 
-# 目標速度の設定
-dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_XL430_GOAL_VELOCITY, DXL_MOVING_SPEED)
+# Enable Dynamixel Torque
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
 if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Dynamixel has been set to the specified speed")
+    print("Failed to enable torque")
+    quit()
 
-# 5秒間待機
-time.sleep(5)
-
-# サーボの停止
-dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_XL430_GOAL_VELOCITY, 0)
+# Set goal velocity
+dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VELOCITY, DXL_MOVING_SPEED)
 if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Dynamixel has been stopped")
+    print("Failed to set goal velocity")
+    quit()
 
-# ポートのクローズ
+print("Dynamixel is now rotating")
+time.sleep(5)  # Rotate for 5 seconds
+
+# Stop rotation
+dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_VELOCITY, 0)
+if dxl_comm_result != COMM_SUCCESS:
+    print("Failed to stop the Dynamixel")
+    quit()
+
+# Disable Dynamixel Torque
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
+if dxl_comm_result != COMM_SUCCESS:
+    print("Failed to disable torque")
+    quit()
+
+# Close port
 portHandler.closePort()
