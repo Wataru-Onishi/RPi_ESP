@@ -2,7 +2,7 @@ import serial
 from dynamixel_sdk import *  # Uses Dynamixel SDK library
 
 # Serial port settings
-SERIAL_PORT = '/dev/ttyUSB0'
+SERIAL_PORT = '/dev/ttyUSB1'
 SERIAL_BAUDRATE = 57600
 
 # Dynamixel settings
@@ -10,7 +10,7 @@ ADDR_TORQUE_ENABLE = 64
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
 OPERATING_MODE_VELOCITY = 1
-DEVICENAME = '/dev/ttyUSB1'
+DEVICENAME = '/dev/ttyUSB0'
 PROTOCOL_VERSION = 2.0
 BAUDRATE = 57600
 
