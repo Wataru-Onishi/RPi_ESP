@@ -5,7 +5,7 @@ from dynamixel_sdk import *  # Uses Dynamixel SDK library
 # シリアルポートとDynamixel設定
 SERIAL_PORT = '/dev/ESP32'
 SERIAL_BAUDRATE = 57600
-WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIhj1uDTmSvbPmQ6ENp0EJpskFnE6PZjnF4wfCATjyejfiwTTEppCKn2IMJf47CjSsDg/exec'
+WEB_APP_URL = 'https://script.google.com/macros/library/d/1Th6OGaTeocE4g-yYgWpgB-SKMWMVg3O0lX6kSxq3Eldf8KwrWni-Za0z/1'
 ADDR_TORQUE_ENABLE = 64
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
