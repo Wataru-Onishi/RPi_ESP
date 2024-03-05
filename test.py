@@ -1,5 +1,5 @@
 import serial
-from dynamixel_sdk import *  # Dynamixel SDKライブラリをインポート
+from dynamixel_sdk import *
 
 # Dynamixel設定
 ADDR_TORQUE_ENABLE = 64      # トルク有効化のアドレス
@@ -39,8 +39,8 @@ def setup_motors():
 
 setup_motors()
 
-# シリアル通信設定
-ser = serial.Serial('/dev/ESP32', 57600)  # ESP32接続ポートを適宜変更
+# ESP32とのシリアル通信設定
+esp32_serial = serial.Serial('/dev/ESP32', 57600)
 
 def motor_control(command):
     # コマンドの形式は "ID:Speed" です
@@ -61,7 +61,24 @@ def motor_control(command):
     else:
         print("Invalid command format")
 
-while True:
-    if ser.in_waiting > 0:
-        line = ser.readline().decode('utf-8').strip()
-        motor_control(line)
+try:
+    while True:
+        # ESP32から電圧値を受信
+        voltage_data = esp32_serial.readline().decode().strip()
+        
+        if voltage_data:
+            # 受信した電圧値を表示
+            print("Received voltage:", voltage_data)
+
+            # 受信した電圧値に対する処理を追加する場合はここに記述
+            # 例: 特定の電圧値に対してモーターの速度を変更するなどのアクションを実行
+
+        time.sleep(0.1)  # 0.1秒間隔で受信
+
+except KeyboardInterrupt:
+    # キーボード割り込みが検出された場合、プログラムを終了
+    print("Keyboard interrupt detected. Exiting...")
+finally:
+    # シリアルポートをクローズ
+    esp32_serial.close()
+    portHandler.closePort()
