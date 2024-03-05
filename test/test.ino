@@ -1,33 +1,44 @@
 #include <Arduino.h>
+#include <PS4Controller.h>
+#include "Ultrasonic.h"
 
 const int adcPin = 34; // ADC入力用ピン
-const float maxVoltage = 3.3; // ESP32のADCの最大電圧
-const int adcResolution = 4095; // ADCの分解能 (12ビット)
 
 void setup() {
   Serial.begin(57600); // シリアル通信の開始
+  PS4.begin("08:B6:1F:ED:80:36");
   analogReadResolution(12); // ADCの解像度を12ビットに設定
+  Serial.println("Ready.");
 }
 
 void loop() {
-  int adcValue = analogRead(adcPin); // ADCから値を読み取る
-  float voltage = (adcValue * maxVoltage) / adcResolution; // 読み取った値を電圧に変換
-  
-  // 電圧を圧力にマッピング
-  float pressure = 0;
-  if (voltage > 1.0) {
-    pressure = (voltage - 1.0) * (810.0 / (2.6 - 1.0));
+  long RangeInCentimeters = ultrasonic.MeasureInCentimeters(); // 超音波センサからの距離を測定
+  delay(10);
+
+  if (PS4.Cross()) {
+    Serial.println("Cross Button - Stopping");
+    Serial.write('0');
+    delay(100);
+    return;
+  }
+
+  checkModeSwitch();
+
+  if (mode) { // モード1: 手動操作
+    manualOperation(RangeInCentimeters);
+  } else { // モード2: 自動操作
+    autoOperation(RangeInCentimeters);
   }
   
-  // 圧力値を整数化してシリアル通信で送信
-  unsigned long pressureInt = static_cast<unsigned long>(pressure);
-  byte pressureBytes[4];
-  pressureBytes[0] = (pressureInt >> 24) & 0xFF;
-  pressureBytes[1] = (pressureInt >> 16) & 0xFF;
-  pressureBytes[2] = (pressureInt >> 8) & 0xFF;
-  pressureBytes[3] = pressureInt & 0xFF;
+  sendVoltageData();
+}
+
+void sendVoltageData() {
+  int adcValue = analogRead(adcPin); // ADCから値を読み取る
   
-  Serial.write(pressureBytes, sizeof(pressureBytes));
+  byte adcBytes[2];
+  adcBytes[0] = (adcValue >> 8) & 0xFF;
+  adcBytes[1] = adcValue & 0xFF;
   
-  delay(1000); // 1秒ごとにデータを送信
+  Serial.write(adcBytes, sizeof(adcBytes)); // ラズベリーパイへ送信
 }
