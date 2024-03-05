@@ -1,31 +1,70 @@
 import serial
+from dynamixel_sdk import *  # Uses Dynamixel SDK library
 
-# シリアルポートの設定。デバイス名は環境に合わせて適宜変更してください。
-SERIAL_PORT = '/dev/ESP32'
-SERIAL_BAUDRATE = 57600
+# シリアルポートの設定
+SERIAL_PORT_ESP32 = '/dev/ESP32'  # ESP32が接続されているシリアルポート
+SERIAL_BAUDRATE_ESP32 = 57600
 
-def read_adc_value(ser):
-    # 2バイト読み取り
-    data = ser.read(2)
-    if len(data) == 2:
-        # バイトデータを整数値に変換
-        adc_value = (data[0] << 8) | data[1]
-        return adc_value
+# Dynamixelの設定
+DEVICENAME_DYNAMIXEL = '/dev/DYNAMIXEL'  # Dynamixelが接続されているシリアルポート
+PROTOCOL_VERSION = 2.0
+BAUDRATE_DYNAMIXEL = 57600
+ADDR_TORQUE_ENABLE = 64
+ADDR_OPERATING_MODE = 11
+ADDR_GOAL_VELOCITY = 104
+OPERATING_MODE_VELOCITY = 1
+
+dxl_portHandler = PortHandler(DEVICENAME_DYNAMIXEL)
+dxl_packetHandler = PacketHandler(PROTOCOL_VERSION)
+
+dxl_base_speeds = {
+    1: -100,  # モーターID 1の基本速度
+    2: -100,  # モーターID 2の基本速度
+    3: 100,   # モーターID 3の基本速度
+    4: 100    # モーターID 4の基本速度
+}
+
+def initialize_dynamixel():
+    if dxl_portHandler.openPort():
+        print("Dynamixel port opened successfully")
     else:
-        # データが不完全な場合はNoneを返す
-        return None
+        print("Failed to open the Dynamixel port")
+        quit()
+
+    if not dxl_portHandler.setBaudRate(BAUDRATE_DYNAMIXEL):
+        print("Failed to change the Dynamixel baudrate")
+        quit()
+
+def control_dynamixel(command):
+    if command == '0':  # 停止
+        print("Command to stop received")
+        for dxl_id in dxl_base_speeds.keys():
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, 0)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 0)
+    elif command == '1':  # 前進
+        print("Command for forward rotation received")
+        for dxl_id, speed in dxl_base_speeds.items():
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, speed)
+    elif command == '2':  # 後退
+        print("Command for reverse rotation received")
+        for dxl_id, speed in dxl_base_speeds.items():
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, -speed)
 
 def main():
-    with serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1) as ser:
-        print("Serial port opened for commands")
+    ser_esp32 = serial.Serial(SERIAL_PORT_ESP32, SERIAL_BAUDRATE_ESP32, timeout=1)
+    print("Serial port for ESP32 opened")
+    
+    initialize_dynamixel()
 
-        while True:
-            adc_value = read_adc_value(ser)
-            if adc_value is not None:
-                print(f"ADC Value: {adc_value}")
-                # 必要に応じて電圧値に変換
-                voltage = (adc_value * 3.3) / 4095  # ここでの3.3はESP32の参照電圧
-                print(f"Voltage: {voltage:.2f} V")
+    while True:
+        if ser_esp32.in_waiting >= 2:
+            # ESP32からのコマンドを読み取り、Dynamixelを制御
+            command = ser_esp32.read().decode('utf-8').strip()
+            control_dynamixel(command)
 
 if __name__ == "__main__":
     main()
