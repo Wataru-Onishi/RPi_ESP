@@ -41,7 +41,7 @@ void loop() {
   Serial.print("Voltage on GPIO34: ");
   Serial.println(voltage, 3);  // 小数点以下3桁で表示
 
-  delay(100);  // 0.1秒間隔でサンプリング
+  delay(500);  // 0.1秒間隔でサンプリング
 
 }
 
