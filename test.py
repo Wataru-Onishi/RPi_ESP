@@ -3,7 +3,7 @@ import requests
 
 SERIAL_PORT = '/dev/ESP32'  # ESP32が接続されているシリアルポート
 SERIAL_BAUDRATE = 57600
-WEB_APP_URL = 'https://script.google.com/macros/library/d/1Th6OGaTeocE4g-yYgWpgB-SKMWMVg3O0lX6kSxq3Eldf8KwrWni-Za0z/1'  # GASウェブアプリケーションのURL
+WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIhj1uDTmSvbPmQ6ENp0EJpskFnE6PZjnF4wfCATjyejfiwTTEppCKn2IMJf47CjSsDg/exec'  # GASウェブアプリケーションのURL
 
 ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1)
 
