@@ -1,110 +1,103 @@
 #include <PS4Controller.h>
 #include "Ultrasonic.h"
-#include <Arduino.h>
 
 bool mode = true; // true: モード1 (手動), false: モード2 (自動)
-Ultrasonic ultrasonic(32); // 超音波センサの入力GPIOを32に設定
+Ultrasonic frontUltrasonic(32); // 前面の超音波センサの入力GPIOを32に設定
+Ultrasonic rearUltrasonic(33); // 後ろの超音波センサの入力GPIOを33に設定
 
 void setup() {
   Serial.begin(57600);
   PS4.begin("08:B6:1F:ED:80:36");
   Serial.println("Ready.");
-
-  // ADCの解像度を12ビットに設定
-  analogReadResolution(12);
-
-
 }
 
 void loop() {
-  long rangeInCentimeters = ultrasonic.MeasureInCentimeters(); // 超音波センサからの距離を測定
+  long frontRange = frontUltrasonic.MeasureInCentimeters(); // 前面の超音波センサからの距離を測定
+  long rearRange = rearUltrasonic.MeasureInCentimeters(); // 後ろの超音波センサからの距離を測定
   delay(10);
 
-  if (PS4.Cross()){ // いつでもCrossボタンで全モータ停止
-    sendStopCommandToAllMotors();
+  // いつでもCrossボタンで停止
+  if (PS4.Cross()){
+    Serial.println("Cross Button - Stopping");
+    Serial.write('0');
+    delay(100);
     return;
   }
 
+  // モード切り替え (L1ボタン) のチェック
   checkModeSwitch();
 
   if (mode) { // モード1: 手動操作
-    manualOperation(rangeInCentimeters);
+    manualOperation(frontRange, rearRange);
   } else { // モード2: 自動操作
-    autoOperation(rangeInCentimeters);
+    autoOperation(frontRange, rearRange);
   }
-
-  // GPIO34からのアナログ値を読み取る（ESP32の場合、ArduinoスタイルでanalogReadを使用）
-  int adcValue = analogRead(34);  // GPIO34のピン番号を直接指定
-  float voltage = adcValue * (3.3 / 4095.0);  // 12ビット解像度での電圧計算
-
-  // 電圧値をシリアル経由で送信
-  Serial.print("Voltage on GPIO34: ");
-  Serial.println(voltage, 3);  // 小数点以下3桁で表示
-
-  delay(500);  // 0.1秒間隔でサンプリング
-
 }
 
 void checkModeSwitch() {
   if (PS4.L1()){
     mode = !mode; // モードを切り替える
-    Serial.println(mode ? "Manual mode" : "Auto mode");
-    sendStopCommandToAllMotors(); // モード切り替え時に全モータ停止
+    Serial.print("Mode changed to: ");
+    Serial.println(mode ? "Manual" : "Auto");
+    Serial.write('0'); // モード切り替え時に停止コマンドを送信
     delay(500); // モード切り替えのデバウンス防止
   }
 }
 
-
-void manualOperation(long rangeInCentimeters) {
-  if (rangeInCentimeters <= 5) { // 障害物を検出したら停止
-    sendStopCommandToAllMotors();
+void manualOperation(long frontRange, long rearRange) {
+  if (frontRange <= 5){ // 前方に障害物を検出したら停止
+    Serial.println("Obstacle detected in front - Stopping");
+    Serial.write('0');
+    delay(100);
+  } else if (rearRange <= 5 && PS4.Down()){ // 後ろに障害物を検出している間は後進不可
+    Serial.println("Obstacle detected in rear - Stopping reverse");
+    Serial.write('0');
+    delay(100);
   } else {
-    if (PS4.Up()) {
-      // 上ボタンが押された場合、モータ1と2は-100、モータ3と4は100で回転
-      Serial.println("1:-100");
-      Serial.println("2:-100");
-      Serial.println("3:100");
-      Serial.println("4:100");
+    // Upボタンで正転
+    if (PS4.Up()){
+      Serial.println("Up Button - Forward");
+      Serial.write('1');
+      delay(100);
     }
-    else if (PS4.Down()) {
-      // 下ボタンが押された場合、モータ1と2は100、モータ3と4は-100で回転
-      Serial.println("1:100");
-      Serial.println("2:100");
-      Serial.println("3:-100");
-      Serial.println("4:-100");
+    // Downボタンで逆転
+    else if (PS4.Down()){
+      Serial.println("Down Button - Reverse");
+      Serial.write('2');
+      delay(100);
     }
-    delay(100); // コマンド送信後の短い遅延
   }
 }
 
-void sendStopCommandToAllMotors() {
-  // 全モータを停止
-  Serial.println("1:0");
-  Serial.println("2:0");
-  Serial.println("3:0");
-  Serial.println("4:0");
-  delay(100); // コマンド送信後の短い遅延
-}
-
-void autoOperation(long rangeInCentimeters) {
+void autoOperation(long frontRange, long rearRange) {
   static bool isObstacleDetected = false;
+  static bool isReversing = false; // 後進中フラグを追加
 
-  if (PS4.R1()) {
+  // R1ボタンで正転開始
+  if (PS4.R1()){
     isObstacleDetected = false; // 障害物検出フラグをリセット
-    // R1ボタンで前進（モータ1と2は-100、モータ3と4は100で回転）
-    Serial.println("1:-100");
-    Serial.println("2:-100");
-    Serial.println("3:100");
-    Serial.println("4:100");
+    isReversing = false; // 後進フラグをリセット
+    Serial.println("R1 Button - Starting Forward");
+    Serial.write('1');
+    delay(100);
   }
 
-  if (rangeInCentimeters <= 5 && !isObstacleDetected) {
+  // 前進中に前方のセンサが障害物を検出したら、後進を開始
+  if (frontRange <= 5 && !isObstacleDetected && !isReversing) {
     isObstacleDetected = true;
-    // 障害物を検出した場合、後進（モータ1と2は100、モータ3と4は-100で回転）
-    Serial.println("1:100");
-    Serial.println("2:100");
-    Serial.println("3:-100");
-    Serial.println("4:-100");
+    isReversing = true; // 後進を開始
+    Serial.println("Obstacle detected - Reversing");
+    Serial.write('2');
+    delay(100);
   }
-  delay(100); // コマンド送信後の短い遅延
+
+  // 後進中に後ろのセンサが障害物を検出したら、停止
+  if (rearRange <= 5 && isReversing) {
+    isReversing = false; // 後進を停止
+    Serial.println("Obstacle detected in rear - Stopping");
+    Serial.write('0');
+    delay(100);
+  }
 }
+
+
