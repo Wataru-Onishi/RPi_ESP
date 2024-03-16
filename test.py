@@ -79,10 +79,10 @@ while True:
             print("Command for left turn received")
             dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
             dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_TORQUE_ENABLE, 1)
-            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 1, ADDR_GOAL_VELOCITY, dxl_base_speeds[1])
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 1, ADDR_GOAL_VELOCITY, -dxl_base_speeds[1])
             dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 3, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
             dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 3, ADDR_TORQUE_ENABLE, 1)
-            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 3, ADDR_GOAL_VELOCITY, -dxl_base_speeds[2])
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 3, ADDR_GOAL_VELOCITY, dxl_base_speeds[2])
 
 # Close the Dynamixel port
 dxl_portHandler.closePort()
