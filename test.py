@@ -18,6 +18,14 @@ BAUDRATE = 57600
 dxl_portHandler = PortHandler(DEVICENAME)
 dxl_packetHandler = PacketHandler(PROTOCOL_VERSION)
 
+# Base speed settings for each motor
+dxl_base_speeds = {
+    1: -100,  # Base speed for motor ID 1
+    2: -100,  # Base speed for motor ID 2
+    3: 100,  # Base speed for motor ID 3
+    4: 100   # Base speed for motor ID 4
+}
+
 # Open the Dynamixel port
 if dxl_portHandler.openPort():
     print("Dynamixel port opened successfully")
@@ -36,14 +44,85 @@ print("Serial port opened for commands")
 
 while True:
     if ser.in_waiting > 0:
-        data = ser.readline().decode('utf-8').strip()
-        motorSpeeds = [int(speed) for speed in data.split(',')]
+        command = ser.read().decode('utf-8').strip()
 
-        for i, speed in enumerate(motorSpeeds):
-            dxl_id = i + 1
-            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
-            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
-            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, speed)
+        if command == '0':  # Stop
+            print("Command to stop received")
+            for dxl_id in dxl_base_speeds.keys():
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, 0)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 0)
+
+        elif command == '1':  # Forward
+            print("Command for forward rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, speed)
+
+        elif command == '2':  # Reverse
+            print("Command for reverse rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, -speed)
+
+        elif command == '3':  # Right turn
+            print("Command for right turn received")
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 1, ADDR_GOAL_VELOCITY, -dxl_base_speeds[1])
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 2, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 2, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 2, ADDR_GOAL_VELOCITY, dxl_base_speeds[2])
+
+        elif command == '4':  # Left turn
+            print("Command for left turn received")
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 1, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 1, ADDR_GOAL_VELOCITY, dxl_base_speeds[1])
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 2, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+            dxl_packetHandler.write1ByteTxRx(dxl_portHandler, 2, ADDR_TORQUE_ENABLE, 1)
+            dxl_packetHandler.write4ByteTxRx(dxl_portHandler, 2, ADDR_GOAL_VELOCITY, -dxl_base_speeds[2])
+
+# Close the Dynamixel port
+dxl_portHandler.closePort()
+
+    if ser.in_waiting > 0:
+        command = ser.read().decode('utf-8').strip()
+
+        if command == '0':  # Stop
+            print("Command to stop received")
+            for dxl_id in dxl_base_speeds.keys():
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, 0)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+
+        elif command == '1':  # Forward
+            print("Command for forward rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, speed)
+
+        elif command == '2':  # Reverse
+            print("Command for reverse rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, -speed)
+
+        elif command == '3':  # Righit
+            print("Command for reverse rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, -speed)
+
+        elif command == '4':  # Left
+            print("Command for reverse rotation received")
+            for dxl_id, speed in dxl_base_speeds.items():
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_OPERATING_MODE, OPERATING_MODE_VELOCITY)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
+                dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, -speed)
 
 # Close the Dynamixel port
 dxl_portHandler.closePort()
