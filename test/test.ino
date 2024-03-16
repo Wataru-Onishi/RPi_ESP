@@ -93,6 +93,19 @@ void manualOperation(long frontRange, long backRange) {
     Serial.write('2');
     delay(100);
   }
+  // Rigihtボタンで正転（前進）
+  if (PS4.Right()){
+    Serial.println("Up Button - Forward");
+    Serial.write('3');
+    delay(100);
+  }
+  // Upボタンで正転（前進）
+  if (PS4.Left()){
+    Serial.println("Up Button - Forward");
+    Serial.write('4');
+    delay(100);
+  }
+
 }
 
 
@@ -126,7 +139,3 @@ void autoOperation(long frontRange, long backRange) {
   }
 }
 
-
-void forword(){
-  
-}
