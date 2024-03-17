@@ -2,8 +2,12 @@
 #include "Ultrasonic.h"
 
 bool mode = true; // true: モード1 (手動), false: モード2 (自動)
+
 Ultrasonic ultrasonicFront(32); // 前方向の超音波センサの入力GPIOを32に設定
 Ultrasonic ultrasonicBack(33); // 後方向の超音波センサの入力GPIOを33に設定
+
+
+
 bool isReversing = false; // 後進中かどうかを示すフラグ
 bool isForwarding = false; // 前進中かどうかを示すフラグ
 
@@ -93,15 +97,15 @@ void manualOperation(long frontRange, long backRange) {
     Serial.write('2');
     delay(100);
   }
-  // Rigihtボタンで正転（前進）
+  // Rigihtボタンで右旋回
   if (PS4.Right()){
-    Serial.println("Up Button - Forward");
+    Serial.println("Righit Button - Forward");
     Serial.write('3');
     delay(100);
   }
-  // Upボタンで正転（前進）
+  // Leftボタンで左旋回
   if (PS4.Left()){
-    Serial.println("Up Button - Forward");
+    Serial.println("Left Button - Forward");
     Serial.write('4');
     delay(100);
   }
