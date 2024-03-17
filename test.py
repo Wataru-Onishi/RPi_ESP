@@ -20,10 +20,10 @@ dxl_packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Base speed settings for each motor
 dxl_base_speeds = {
-    1: -100,  # Base speed for motor ID 1
-    2: -100,  # Base speed for motor ID 2
-    3: 100,  # Base speed for motor ID 3
-    4: 100   # Base speed for motor ID 4
+    1: -50,  # Base speed for motor ID 1
+    2: -50,  # Base speed for motor ID 2
+    3: 50,  # Base speed for motor ID 3
+    4: 50   # Base speed for motor ID 4
 }
 
 # Open the Dynamixel port
