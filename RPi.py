@@ -50,7 +50,7 @@ while True:
             print("Command to stop received")
             for dxl_id in dxl_base_speeds.keys():
                 dxl_packetHandler.write4ByteTxRx(dxl_portHandler, dxl_id, ADDR_GOAL_VELOCITY, 0)
-                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 0)
+                dxl_packetHandler.write1ByteTxRx(dxl_portHandler, dxl_id, ADDR_TORQUE_ENABLE, 1)
 
         elif command == '1':  # Forward
             print("Command for forward rotation received")
