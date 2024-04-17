@@ -16,7 +16,7 @@ PROTOCOL_VERSION       = 2.0                   # Protocol version
 # Default setting
 DXL_ID                 = 7                     # Dynamixel ID
 BAUDRATE               = 57600                 # Baudrate
-DEVICENAME             = 'COM1'                # Check which port is being used on your controller
+DEVICENAME             = '/dev/DYNAMIXEL'                # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
 
 TORQUE_ENABLE          = 1                     # Value for enabling the torque
