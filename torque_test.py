@@ -1,112 +1,71 @@
-import os
-from dynamixel_sdk import *                    # Uses Dynamixel SDK library
+import time
+import serial
 
-# Control table address
-ADDR_PRO_CURRENT_LIMIT   = 38                  # EEPROM area
-ADDR_PRO_GOAL_CURRENT    = 102                 # RAM area
-ADDR_PRO_GOAL_POSITION   = 116                 # RAM area
-ADDR_PRO_OPERATING_MODE  = 11                  # EEPROM area
-ADDR_PRO_TORQUE_ENABLE   = 64                  # RAM area
+# DYNAMIXELの設定
+DEVICENAME = '/dev/DYNAMIXEL'  # 接続先のパス
+BAUDRATE = 57600  # ボーレート
+ID = 7  # DYNAMIXELのID
 
-# Data Byte Length
-LEN_PRO_GOAL_CURRENT     = 2
-LEN_PRO_GOAL_POSITION    = 4
+# コマンド
+TORQUE_CONTROL_MODE = 4
+VELOCITY_CONTROL_MODE = 1
+SET_CURRENT = 1024  # 6mAを表す値
+SET_POSITION = 1800
 
-# Protocol version
-PROTOCOL_VERSION         = 2.0                 # See which protocol version is used in the Dynamixel
+def set_torque_control_mode(port):
+    # 電流制御モードに設定
+    port.write(bytearray([ID, TORQUE_CONTROL_MODE, 0x00, 0x00]))
+    port.flush()
 
-# Default setting
-DXL_ID                   = 7                   # Dynamixel ID
-BAUDRATE                 = 57600
-DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
+def set_velocity_control_mode(port):
+    # 位置制御モードに設定
+    port.write(bytearray([ID, VELOCITY_CONTROL_MODE, 0x00, 0x00]))
+    port.flush()
 
-CURRENT_CONTROL_MODE     = 0x0A                # Current Control mode (0x0A for XM430-W350)
-POSITION_CONTROL_MODE   = 3                   # Position Control mode
+def set_current(port, current):
+    # 電流制御モードでの電流設定
+    port.write(bytearray([ID, 71, current & 0xFF, (current >> 8) & 0xFF]))
+    port.flush()
 
-TORQUE_ENABLE            = 1                   # Value for enabling the torque
-TORQUE_DISABLE           = 0                   # Value for disabling the torque
+def set_position(port, position):
+    # 位置制御モードでの位置設定
+    port.write(bytearray([ID, 116, position & 0xFF, (position >> 8) & 0xFF]))
+    port.flush()
 
-# Initialize PortHandler instance
-portHandler = PortHandler(DEVICENAME)
+def main():
+    with serial.Serial(DEVICENAME, BAUDRATE) as port:
+        port.timeout = 0.1  # タイムアウトを設定
+        
+        print("DYNAMIXELへの接続完了")
+        
+        set_torque_control_mode(port)  # 初期は電流制御モード
+        
+        while True:
+            try:
+                command = input("1: 電流制御モードで6mA, 2: 位置制御モードで1800, exit: 終了\n")
 
-# Initialize PacketHandler instance
-packetHandler = PacketHandler(PROTOCOL_VERSION)
+                if command == "1":
+                    set_torque_control_mode(port)
+                    set_current(port, SET_CURRENT)
+                    print("電流制御モードで6mAを流しました")
 
-# Open port
-if portHandler.openPort():
-    print("Succeeded to open the port")
-else:
-    print("Failed to open the port")
-    print("Press any key to terminate...")
-    os._exit(0)
+                elif command == "2":
+                    set_velocity_control_mode(port)
+                    set_position(port, SET_POSITION)
+                    print("位置制御モードで1800に移動しました")
 
-# Set port baudrate
-if portHandler.setBaudRate(BAUDRATE):
-    print("Succeeded to change the baudrate")
-else:
-    print("Failed to change the baudrate")
-    print("Press any key to terminate...")
-    os._exit(0)
+                elif command == "exit":
+                    print("プログラムを終了します")
+                    break
 
-# Set operating mode to current control mode
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("Failed to change operating mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("Error occurred while changing operating mode: %s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Operating mode set to current control.")
+                else:
+                    print("無効なコマンドです")
 
-# Main loop
-while True:
-    print("Type 'on' to enable torque and set current, 'off' to move to position 1800, or 'exit' to quit:")
-    cmd = input()
-    if cmd == "on":
-        # Enable Dynamixel Torque
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to enable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("Error occurred while enabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Torque enabled")
+            except KeyboardInterrupt:
+                print("\nプログラムを終了します")
+                break
 
-        # Set goal current to 6mA
-        goal_current = 6  # 6mA
-        dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to set goal current: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("Error occurred while setting goal current: %s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Goal current set to %d mA" % goal_current)
-    
-    elif cmd == "off":
-        # Change to position control mode
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, POSITION_CONTROL_MODE)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to change to position control mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("Error occurred while changing to position control mode: %s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Operating mode set to position control.")
+            time.sleep(0.1)  # ループを速すぎないようにスリープ
 
-        # Move to position 1800
-        goal_position = 1800
-        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_POSITION, goal_position)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to move to position 1800: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("Error occurred while moving to position 1800: %s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Moved to position 1800")
-    
-    elif cmd == "exit":
-        print("Exiting...")
-        break
-    
-    else:
-        print("Invalid command!")
-
-# Close port
-portHandler.closePort()
+if __name__ == "__main__":
+    main()
