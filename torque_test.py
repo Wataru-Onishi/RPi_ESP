@@ -48,15 +48,6 @@ else:
     print("Press any key to terminate...")
     os._exit(0)
 
-# Set operating mode to current control mode by default
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("Failed to change operating mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("Error occurred while changing operating mode: %s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Operating mode set to current control.")
-
 # Main loop
 while True:
     print("Type 'on' to enable torque and set current, 'off' to switch to position control mode, 'exit' to quit:")
@@ -70,6 +61,15 @@ while True:
             print("Error occurred while enabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
         else:
             print("Torque enabled")
+
+        # Set operating mode to current control mode
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to change operating mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while changing operating mode: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Operating mode set to current control.")
 
         # Set goal current to 6mA
         goal_current = 6  # 6mA
