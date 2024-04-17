@@ -16,7 +16,7 @@ PROTOCOL_VERSION       = 2.0                   # Protocol version
 # Default setting
 DXL_ID                 = 7                     # Dynamixel ID
 BAUDRATE               = 57600                 # Baudrate
-DEVICENAME             = 'COM1'                # Check which port is being used on your controller
+DEVICENAME = '/dev/DYNAMIXEL'                # Check which port is being used on your controller
 
 TORQUE_ENABLE          = 1                     # Value for enabling the torque
 TORQUE_DISABLE         = 0                     # Value for disabling the torque
@@ -81,7 +81,7 @@ def decode_hardware_error(error_code):
     return ", ".join(errors)
 
 # Write goal current
-goal_current = 1000   # mA
+goal_current = 100   # mA
 dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_CURRENT, goal_current)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
