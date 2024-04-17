@@ -20,8 +20,6 @@ BAUDRATE                 = 57600
 DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
 
 CURRENT_CONTROL_MODE     = 0x0A                # Current Control mode (0x0A for XM430-W350)
-TORQUE_ENABLE            = 1                   # Value for enabling the torque
-TORQUE_DISABLE           = 0                   # Value for disabling the torque
 
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
@@ -81,16 +79,3 @@ while True:
         # Disable Dynamixel Torque
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
         if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to disable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("Error occurred while disabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Torque disabled")
-    elif cmd == "exit":
-        print("Exiting...")
-        break
-    else:
-        print("Invalid command!")
-
-# Close port
-portHandler.closePort()
