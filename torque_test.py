@@ -16,7 +16,7 @@ PROTOCOL_VERSION       = 2.0                   # Protocol version
 # Default setting
 DXL_ID                 = 7                     # Dynamixel ID
 BAUDRATE               = 57600                 # Baudrate
-DEVICENAME = '/dev/DYNAMIXEL'                # Check which port is being used on your controller
+DEVICENAME             = 'COM1'                # Check which port is being used on your controller
 
 TORQUE_ENABLE          = 1                     # Value for enabling the torque
 TORQUE_DISABLE         = 0                     # Value for disabling the torque
@@ -33,12 +33,14 @@ if portHandler.openPort():
     print("Port opened successfully")
 else:
     print("Failed to open the port")
+    exit()
 
 # Set port baudrate
 if portHandler.setBaudRate(BAUDRATE):
     print("Baudrate set successfully")
 else:
     print("Failed to change the baudrate")
+    exit()
 
 # Set operating mode to current control mode
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, CURRENT_CONTROL_MODE)
@@ -58,20 +60,28 @@ elif dxl_error != 0:
 else:
     print("Dynamixel has been successfully enabled")
 
-# Check for hardware error after enabling torque
+# Read Hardware Error Status
 dxl_comm_result, dxl_error, dxl_hw_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_HARDWARE_ERROR)
 if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    print("Failed to read hardware error status: %s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
+    print("Communication error when reading hardware error status: %s" % packetHandler.getRxPacketError(dxl_error))
 else:
+    print("Hardware error status: %d" % dxl_hw_error)
     if dxl_hw_error != 0:
-        print("Hardware error status after enabling torque: %d" % dxl_hw_error)
-    else:
-        print("No hardware error after enabling torque")
+        print("Error Code: %d -> %s" % (dxl_hw_error, decode_hardware_error(dxl_hw_error)))
+
+def decode_hardware_error(error_code):
+    errors = []
+    if error_code & 1: errors.append("Input Voltage Error")
+    if error_code & 2: errors.append("Overheating Error")
+    if error_code & 4: errors.append("Motor Encoder Error")
+    if error_code & 8: errors.append("Electrical Shock Error")
+    if error_code & 16: errors.append("Overload Error")
+    return ", ".join(errors)
 
 # Write goal current
-goal_current = 100   # mA
+goal_current = 1000   # mA
 dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_CURRENT, goal_current)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
@@ -79,18 +89,6 @@ elif dxl_error != 0:
     print("%s" % packetHandler.getRxPacketError(dxl_error))
 else:
     print("Goal current has been set")
-
-# Check for hardware error after setting goal current
-dxl_comm_result, dxl_error, dxl_hw_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_HARDWARE_ERROR)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    if dxl_hw_error != 0:
-        print("Hardware error status after setting goal current: %d" % dxl_hw_error)
-    else:
-        print("No hardware error after setting goal current")
 
 # Disable Dynamixel Torque
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
