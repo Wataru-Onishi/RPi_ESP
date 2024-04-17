@@ -3,13 +3,14 @@ from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
 # Control table address
 ADDR_PRO_CURRENT_LIMIT   = 38                  # EEPROM area
-ADDR_PRO_GOAL_CURRENT    = 102                 # RAM area
+ADDR_PRO_GOAL_POSITION   = 116                 # RAM area for position control mode
+ADDR_PRO_GOAL_CURRENT    = 102                 # RAM area for current control mode
 ADDR_PRO_OPERATING_MODE  = 11                  # EEPROM area
 ADDR_PRO_TORQUE_ENABLE   = 64                  # RAM area
 
 # Data Byte Length
 LEN_PRO_GOAL_CURRENT     = 2
-LEN_PRO_CURRENT_LIMIT    = 2
+LEN_PRO_GOAL_POSITION    = 4
 
 # Protocol version
 PROTOCOL_VERSION         = 2.0                 # See which protocol version is used in the Dynamixel
@@ -19,6 +20,8 @@ DXL_ID                   = 7                   # Dynamixel ID
 BAUDRATE                 = 57600
 DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
 
+# Control modes
+POSITION_CONTROL_MODE    = 3                   # Position Control mode
 CURRENT_CONTROL_MODE     = 0x0A                # Current Control mode (0x0A for XM430-W350)
 TORQUE_ENABLE            = 1                   # Value for enabling the torque
 TORQUE_DISABLE           = 0                   # Value for disabling the torque
@@ -45,7 +48,7 @@ else:
     print("Press any key to terminate...")
     os._exit(0)
 
-# Set operating mode to current control mode
+# Set operating mode to current control mode by default
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
 if dxl_comm_result != COMM_SUCCESS:
     print("Failed to change operating mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
@@ -56,7 +59,7 @@ else:
 
 # Main loop
 while True:
-    print("Type 'on' to enable torque and set current, 'off' to disable torque, or 'exit' to quit:")
+    print("Type 'on' to enable torque and set current, 'off' to switch to position control mode, 'exit' to quit:")
     cmd = input()
     if cmd == "on":
         # Enable Dynamixel Torque
@@ -79,14 +82,34 @@ while True:
             print("Goal current set to %d mA" % goal_current)
     
     elif cmd == "off":
-        # Disable Dynamixel Torque
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
+        # Switch to position control mode
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, POSITION_CONTROL_MODE)
         if dxl_comm_result != COMM_SUCCESS:
-            print("Failed to disable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+            print("Failed to switch to position control mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
-            print("Error occurred while disabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
+            print("Error occurred while switching to position control mode: %s" % packetHandler.getRxPacketError(dxl_error))
         else:
-            print("Torque disabled")
+            print("Switched to position control mode")
+    
+        # Prompt user to input position value
+        while True:
+            try:
+                pos_input = int(input("Enter position value (0-4095): "))
+                if pos_input < 0 or pos_input > 4095:
+                    print("Position value must be between 0 and 4095")
+                else:
+                    break
+            except ValueError:
+                print("Invalid input. Please enter an integer between 0 and 4095.")
+
+        # Set goal position
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_POSITION, pos_input)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to set goal position: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while setting goal position: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Goal position set to %d" % pos_input)
     
     elif cmd == "exit":
         print("Exiting...")
