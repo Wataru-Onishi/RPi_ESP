@@ -19,6 +19,8 @@ DXL_ID                   = 7                   # Dynamixel ID
 BAUDRATE                 = 57600
 DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
 
+CURRENT_CONTROL_MODE     = 0x0A
+
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
 
