@@ -1,26 +1,31 @@
+import os
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
+# Control table address
+ADDR_PRO_CURRENT_LIMIT   = 38                  # EEPROM area
+ADDR_PRO_GOAL_CURRENT    = 102                 # RAM area
+ADDR_PRO_OPERATING_MODE  = 11                  # EEPROM area
+ADDR_PRO_TORQUE_ENABLE   = 64                  # RAM area
+
+# Data Byte Length
+LEN_PRO_GOAL_CURRENT     = 2
+LEN_PRO_CURRENT_LIMIT    = 2
+
 # Protocol version
-PROTOCOL_VERSION = 2.0                         # See which protocol version is used in the Dynamixel
+PROTOCOL_VERSION         = 2.0                 # See which protocol version is used in the Dynamixel
 
 # Default setting
-DXL_ID = 7                                     # Dynamixel ID : 7
-BAUDRATE = 57600                               # Dynamixel default baudrate : 57600
-DEVICENAME = '/dev/DYNAMIXEL'                  # Check which port is being used on your controller
+DXL_ID                   = 7                   # Dynamixel ID
+BAUDRATE                 = 57600
+DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
 
-# Dynamixel Control Table Addresses
-ADDR_PRO_TORQUE_ENABLE = 64                    # Control table address is different in Dynamixel model
-ADDR_PRO_GOAL_POSITION = 116
-ADDR_PRO_PRESENT_POSITION = 132
-ADDR_PRO_OPERATING_MODE = 11
-
-# Dynamixel data length
-LEN_PRO_GOAL_POSITION = 4
-
-# Dynamixel Operating Mode
-POSITION_CONTROL_MODE = 3                      # Operating mode set to position control
+TORQUE_ENABLE            = 1                   # Value for enabling the torque
+TORQUE_DISABLE           = 0                   # Value for disabling the torque
+CURRENT_CONTROL_MODE     = 0                   # Current Control mode
 
 # Initialize PortHandler instance
+# Set the port path
+# Get methods and members of PortHandlerLinux or PortHandlerWindows
 portHandler = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
@@ -28,27 +33,31 @@ packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Open port
 if portHandler.openPort():
-    print("Port has been opened successfully")
+    print("Succeeded to open the port")
 else:
     print("Failed to open the port")
-    quit()
+    print("Press any key to terminate...")
+    os._exit(0)
 
 # Set port baudrate
-if not portHandler.setBaudRate(BAUDRATE):
+if portHandler.setBaudRate(BAUDRATE):
+    print("Succeeded to change the baudrate")
+else:
     print("Failed to change the baudrate")
-    quit()
+    print("Press any key to terminate...")
+    os._exit(0)
 
-# Set operating mode to position control mode
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, POSITION_CONTROL_MODE)
+# Change Dynamixel ID to current control mode
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
     print("%s" % packetHandler.getRxPacketError(dxl_error))
 else:
-    print("Operating mode set to position control")
+    print("Operating mode changed to current control mode.")
 
 # Enable Dynamixel Torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, 1)
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
@@ -56,27 +65,18 @@ elif dxl_error != 0:
 else:
     print("Dynamixel has been successfully enabled")
 
-# Write goal position
-goal_position = 2048  # Example position
-dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_POSITION, goal_position)
+# Write goal current
+goal_current = 10  # 10mA
+dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
     print("%s" % packetHandler.getRxPacketError(dxl_error))
 else:
-    print("Goal position has been set")
-
-# Read present position
-dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_PRESENT_POSITION)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Current position is %i" % dxl_present_position)
+    print("Goal current has been set")
 
 # Disable Dynamixel Torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, 0)
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
