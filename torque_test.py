@@ -1,71 +1,87 @@
-import time
-import serial
+import dynamixel_sdk as dxl
 
-# DYNAMIXELの設定
-DEVICENAME = '/dev/DYNAMIXEL'  # 接続先のパス
-BAUDRATE = 57600  # ボーレート
-ID = 7  # DYNAMIXELのID
+# Control table address
+ADDR_OPERATING_MODE = 11
+ADDR_CURRENT_LIMIT = 38
+ADDR_GOAL_POSITION = 30
+ADDR_PRESENT_POSITION = 36
 
-# コマンド
-TORQUE_CONTROL_MODE = 4
-VELOCITY_CONTROL_MODE = 1
-SET_CURRENT = 1024  # 6mAを表す値
-SET_POSITION = 1800
+# Protocol version
+PROTOCOL_VERSION = 2.0
 
-def set_torque_control_mode(port):
-    # 電流制御モードに設定
-    port.write(bytearray([ID, TORQUE_CONTROL_MODE, 0x00, 0x00]))
-    port.flush()
+# Default setting
+DXL_ID = 7  # DYNAMIXEL ID
+BAUDRATE = 57600  # Default baudrate
+DEVICENAME = '/dev/DYNAMIXEL'  # Default device name
 
-def set_velocity_control_mode(port):
-    # 位置制御モードに設定
-    port.write(bytearray([ID, VELOCITY_CONTROL_MODE, 0x00, 0x00]))
-    port.flush()
+# Initialize PortHandler instance
+portHandler = dxl.PortHandler(DEVICENAME)
 
-def set_current(port, current):
-    # 電流制御モードでの電流設定
-    port.write(bytearray([ID, 71, current & 0xFF, (current >> 8) & 0xFF]))
-    port.flush()
+# Initialize PacketHandler instance
+packetHandler = dxl.PacketHandler(PROTOCOL_VERSION)
 
-def set_position(port, position):
-    # 位置制御モードでの位置設定
-    port.write(bytearray([ID, 116, position & 0xFF, (position >> 8) & 0xFF]))
-    port.flush()
+# Open port
+if portHandler.openPort():
+    print("Succeeded to open the port")
+else:
+    print("Failed to open the port")
+    quit()
 
-def main():
-    with serial.Serial(DEVICENAME, BAUDRATE) as port:
-        port.timeout = 0.1  # タイムアウトを設定
+# Set baudrate
+if portHandler.setBaudRate(BAUDRATE):
+    print("Succeeded to change the baudrate")
+else:
+    print("Failed to change the baudrate")
+    quit()
+
+# Function to set operating mode to current control mode
+def set_current_control_mode():
+    dxl_comm_result, _ = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 0)
+    return dxl_comm_result == dxl.COMM_SUCCESS
+
+# Function to set current limit
+def set_current_limit(current_limit):
+    dxl_comm_result, _ = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_CURRENT_LIMIT, current_limit)
+    return dxl_comm_result == dxl.COMM_SUCCESS
+
+# Function to set goal position
+def set_goal_position(goal_position):
+    dxl_comm_result, _ = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, goal_position)
+    return dxl_comm_result == dxl.COMM_SUCCESS
+
+# Function to get present position
+def get_present_position():
+    present_position, _, _ = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+    return present_position
+
+# Main code
+try:
+    while True:
+        command = input("Enter command (1: Set current control mode, 2: Move to position 1800, 3: Move to position 0, exit: Exit program): ")
         
-        print("DYNAMIXELへの接続完了")
-        
-        set_torque_control_mode(port)  # 初期は電流制御モード
-        
-        while True:
-            try:
-                command = input("1: 電流制御モードで6mA, 2: 位置制御モードで1800, exit: 終了\n")
+        if command == '1':
+            if set_current_control_mode():
+                print("Changed to current control mode")
+                set_current_limit(6)  # Set current limit to 6mA
+            else:
+                print("Failed to change to current control mode")
 
-                if command == "1":
-                    set_torque_control_mode(port)
-                    set_current(port, SET_CURRENT)
-                    print("電流制御モードで6mAを流しました")
+        elif command == '2':
+            set_goal_position(1800)  # Move to position 1800
+            print("Moving to position 1800")
 
-                elif command == "2":
-                    set_velocity_control_mode(port)
-                    set_position(port, SET_POSITION)
-                    print("位置制御モードで1800に移動しました")
+        elif command == '3':
+            set_goal_position(0)  # Move to position 0
+            print("Moving to position 0")
 
-                elif command == "exit":
-                    print("プログラムを終了します")
-                    break
+        elif command == 'exit':
+            break
 
-                else:
-                    print("無効なコマンドです")
+        else:
+            print("Invalid command")
 
-            except KeyboardInterrupt:
-                print("\nプログラムを終了します")
-                break
+except KeyboardInterrupt:
+    print("\nProgram interrupted")
 
-            time.sleep(0.1)  # ループを速すぎないようにスリープ
-
-if __name__ == "__main__":
-    main()
+# Close port
+portHandler.closePort()
