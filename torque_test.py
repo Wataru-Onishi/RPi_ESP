@@ -19,8 +19,7 @@ DXL_ID                   = 7                   # Dynamixel ID
 BAUDRATE                 = 57600
 DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used on your controller
 
-CURRENT_CONTROL_MODE     = 0x0A
-
+CURRENT_CONTROL_MODE     = 0x0A                # Current Control mode (0x0A for XM430-W350)
 TORQUE_ENABLE            = 1                   # Value for enabling the torque
 TORQUE_DISABLE           = 0                   # Value for disabling the torque
 
@@ -47,27 +46,52 @@ else:
     os._exit(0)
 
 # Set operating mode to current control mode
-packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_OPERATING_MODE, CURRENT_CONTROL_MODE)
+if dxl_comm_result != COMM_SUCCESS:
+    print("Failed to change operating mode: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+elif dxl_error != 0:
+    print("Error occurred while changing operating mode: %s" % packetHandler.getRxPacketError(dxl_error))
+else:
+    print("Operating mode set to current control.")
 
-# Set goal current
-goal_current = 6  # 6mA
-packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
-
-# Enable/Disable torque based on user input
+# Main loop
 while True:
-    print("Type 'on' to enable torque, 'off' to disable torque, or 'exit' to quit:")
+    print("Type 'on' to enable torque and set current, 'off' to disable torque, or 'exit' to quit:")
     cmd = input()
     if cmd == "on":
         # Enable Dynamixel Torque
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)
-        print("Torque enabled")
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to enable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while enabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Torque enabled")
+
+        # Set goal current to 6mA
+        goal_current = 6  # 6mA
+        dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to set goal current: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while setting goal current: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Goal current set to %d mA" % goal_current)
+    
     elif cmd == "off":
         # Disable Dynamixel Torque
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
-        print("Torque disabled")
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to disable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while disabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Torque disabled")
+    
     elif cmd == "exit":
         print("Exiting...")
         break
+    
     else:
         print("Invalid command!")
 
