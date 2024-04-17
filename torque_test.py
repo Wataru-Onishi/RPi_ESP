@@ -21,6 +21,9 @@ DEVICENAME               = '/dev/DYNAMIXEL'    # Check which port is being used 
 
 CURRENT_CONTROL_MODE     = 0x0A
 
+TORQUE_ENABLE            = 1                   # Value for enabling the torque
+TORQUE_DISABLE           = 0                   # Value for disabling the torque
+
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
 
