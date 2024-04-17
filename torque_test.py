@@ -54,19 +54,9 @@ elif dxl_error != 0:
 else:
     print("Operating mode set to current control.")
 
-# Set goal current
-goal_current = 6  # 6mA
-dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
-if dxl_comm_result != COMM_SUCCESS:
-    print("Failed to set goal current: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("Error occurred while setting goal current: %s" % packetHandler.getRxPacketError(dxl_error))
-else:
-    print("Goal current set to %d mA" % goal_current)
-
-# Enable/Disable torque based on user input
+# Main loop
 while True:
-    print("Type 'on' to enable torque, 'off' to disable torque, or 'exit' to quit:")
+    print("Type 'on' to enable torque and set current, 'off' to disable torque, or 'exit' to quit:")
     cmd = input()
     if cmd == "on":
         # Enable Dynamixel Torque
@@ -77,6 +67,17 @@ while True:
             print("Error occurred while enabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
         else:
             print("Torque enabled")
+
+        # Set goal current to 6mA
+        goal_current = 6  # 6mA
+        dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_CURRENT, goal_current)
+        if dxl_comm_result != COMM_SUCCESS:
+            print("Failed to set goal current: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("Error occurred while setting goal current: %s" % packetHandler.getRxPacketError(dxl_error))
+        else:
+            print("Goal current set to %d mA" % goal_current)
+    
     elif cmd == "off":
         # Disable Dynamixel Torque
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE)
@@ -86,9 +87,11 @@ while True:
             print("Error occurred while disabling torque: %s" % packetHandler.getRxPacketError(dxl_error))
         else:
             print("Torque disabled")
+    
     elif cmd == "exit":
         print("Exiting...")
         break
+    
     else:
         print("Invalid command!")
 
