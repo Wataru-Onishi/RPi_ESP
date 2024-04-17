@@ -5,7 +5,7 @@ from dynamixel_sdk import *                    # Dynamixel SDK library
 ADDR_PRO_CURRENT_LIMIT   = 38                  # EEPROM area
 ADDR_PRO_GOAL_POSITION   = 116                 # RAM area for position control
 ADDR_PRO_GOAL_CURRENT    = 102                 # RAM area
-ADDR_PRO_OPERATING_MODE  = 11                  # EEPROM area
+ADDR_PRO_OPERATING_MODE  = 11                  # RAM area for operating mode
 ADDR_PRO_TORQUE_ENABLE   = 64                  # RAM area
 
 # Data Byte Length
