@@ -90,16 +90,12 @@ else:
 # Close port
 portHandler.closePort()
 
-# Attempt to clear the error status
-dxl_comm_result, dxl_error = packetHandler.clearMultiTurn(portHandler, DXL_ID)
+# Read Hardware Error Status
+dxl_comm_result, dxl_error, dxl_hw_error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_HARDWARE_ERROR)
 if dxl_comm_result != COMM_SUCCESS:
-    print("Failed to clear error: %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+elif dxl_error != 0:
+    print("%s" % packetHandler.getRxPacketError(dxl_error))
 else:
-    print("Error cleared successfully")
+    print("Hardware error status: %d" % dxl_hw_error)
 
-# Try to re-enable torque after clearing the error
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("Failed to re-enable torque: %s" % packetHandler.getTxRxResult(dxl_comm_result))
-else:
-    print("Torque re-enabled successfully")
