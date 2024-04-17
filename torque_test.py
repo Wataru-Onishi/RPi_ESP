@@ -3,27 +3,25 @@ import time
 from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
 # Control table address
-ADDR_PRO_LED_RED                = 65           # Control table address is different in Dynamixel model
+ADDR_PRO_LED_RED                = 65          # Address for LED control
+ADDR_HARDWARE_ERROR_STATUS      = 70          # Address for Hardware Error Status
 
 # Data Byte Length
-LEN_PRO_LED_RED                 = 1            # Data length
+LEN_PRO_LED_RED                 = 1           # Data length for LED control
+LEN_HARDWARE_ERROR_STATUS       = 1           # Data length for Hardware Error Status
 
 # Protocol version
-PROTOCOL_VERSION                = 2.0          # See which protocol version is used in the Dynamixel
+PROTOCOL_VERSION                = 2.0         # Protocol version
 
 # Default setting
-DXL_ID                          = 7            # Dynamixel ID : 7
-BAUDRATE                        = 57600        # Dynamixel default baudrate : 57600
-DEVICENAME                      = '/dev/DYNAMIXEL' # Check which port is being used on your controller
+DXL_ID                          = 7           # Dynamixel ID : 7
+BAUDRATE                        = 57600       # Dynamixel default baudrate : 57600
+DEVICENAME                      = '/dev/DYNAMIXEL' # Port name
 
 # Initialize PortHandler instance
-# Set the port path
-# Get methods and members of PortHandlerLinux or PortHandlerWindows
 portHandler = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
-# Set the protocol version
-# Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Open port
@@ -53,8 +51,14 @@ try:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Dynamixel has been successfully turned on")
+            # Read and print Hardware Error Status
+            error_status, result, error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_HARDWARE_ERROR_STATUS)
+            if result != COMM_SUCCESS:
+                print("Failed to read error status:", packetHandler.getTxRxResult(result))
+            else:
+                print("Hardware Error Status:", error_status)
+
+        print("LED turned on")
 
         time.sleep(1)   # 1 second pause
 
@@ -64,8 +68,14 @@ try:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-        else:
-            print("Dynamixel has been successfully turned off")
+            # Read and print Hardware Error Status
+            error_status, result, error = packetHandler.read1ByteTxRx(portHandler, DXL_ID, ADDR_HARDWARE_ERROR_STATUS)
+            if result != COMM_SUCCESS:
+                print("Failed to read error status:", packetHandler.getTxRxResult(result))
+            else:
+                print("Hardware Error Status:", error_status)
+
+        print("LED turned off")
 
         time.sleep(1)   # 1 second pause
 
