@@ -60,7 +60,7 @@ else:
     print("Dynamixel has been successfully enabled")
 
 # Write goal current
-goal_current = 1000   # mA
+goal_current = 10   # mA
 dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_CURRENT, goal_current)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
