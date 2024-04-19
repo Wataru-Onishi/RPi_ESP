@@ -1,7 +1,7 @@
 import serial
 import time
 
-with serial.Serial('/dev/ttyUSB0', 115200, timeout=1) as ser:
+with serial.Serial('/dev/ESP32', 115200, timeout=1) as ser:
     while True:
         line = ser.readline().decode('utf-8').strip()
         if line:
