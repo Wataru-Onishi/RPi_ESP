@@ -13,14 +13,14 @@ joystick.init()
 ADDR_OPERATING_MODE = 11
 ADDR_TORQUE_ENABLE = 64
 ADDR_GOAL_CURRENT = 102
-ADDR_GOAL_VELOCITY = 104  # Added for velocity control
+ADDR_GOAL_VELOCITY = 104  # For velocity control
 ADDR_GOAL_POSITION = 116
 ADDR_PRESENT_POSITION = 132
 
 # Data Byte Length
 LEN_GOAL_CURRENT = 2
+LEN_GOAL_VELOCITY = 4
 LEN_GOAL_POSITION = 4
-LEN_GOAL_VELOCITY = 4  # Typically 4 bytes for extended control
 
 # Protocol version
 PROTOCOL_VERSION = 2.0
@@ -38,13 +38,13 @@ TORQUE_DISABLE = 0
 # Operating Modes
 CURRENT_CONTROL_MODE = 0
 POSITION_CONTROL_MODE = 3
-VELOCITY_CONTROL_MODE = 1  # Added for velocity control
+VELOCITY_CONTROL_MODE = 1  # For velocity control
 
 # Goal settings for ID 7
 goal_current_mA = 6  # in mA
 goal_position_1 = 1800  # Example position
 
-# Velocity settings
+# Velocity settings for IDs 5 & 6
 goal_velocity_forward = 200  # Positive for forward
 goal_velocity_backward = -200  # Negative for backward
 
@@ -73,8 +73,14 @@ def set_operating_mode(id, mode):
     packetHandler.write1ByteTxRx(portHandler, id, ADDR_OPERATING_MODE, mode)
     enable_torque([id], TORQUE_ENABLE)  # Re-enable torque after changing mode
 
+def set_goal_current(id, current):
+    packetHandler.write2ByteTxRx(portHandler, id, ADDR_GOAL_CURRENT, current)
+
 def set_goal_velocity(id, velocity):
     packetHandler.write4ByteTxRx(portHandler, id, ADDR_GOAL_VELOCITY, velocity)
+
+def set_goal_position(id, position):
+    packetHandler.write4ByteTxRx(portHandler, id, ADDR_GOAL_POSITION, position)
 
 # Enable torque for all motors
 enable_torque([DXL_ID_7, DXL_ID_5, DXL_ID_6], TORQUE_ENABLE)
