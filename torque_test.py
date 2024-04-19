@@ -6,6 +6,7 @@ ADDR_OPERATING_MODE = 11                       # Operating mode address
 ADDR_TORQUE_ENABLE = 64                        # Torque enable address
 ADDR_GOAL_CURRENT = 102                        # Goal current address
 ADDR_GOAL_POSITION = 116                       # Goal position address
+ADDR_PRESENT_POSITION = 132                    # Address of current position
 
 # Data Byte Length
 LEN_GOAL_CURRENT = 2
@@ -21,6 +22,10 @@ DEVICENAME = '/dev/DYNAMIXEL'                  # Check which port is being used 
 
 TORQUE_ENABLE = 1                              # Value for enabling the torque
 TORQUE_DISABLE = 0                             # Value for disabling the torque
+
+# Current control mode and position control mode setting
+CURRENT_CONTROL_MODE = 0                       # Current control mode
+POSITION_CONTROL_MODE = 3                      # Position control mode (extended position control mode might be 4)
 
 # Initialize PortHandler instance
 # Set the port path
@@ -62,19 +67,19 @@ while True:
     data = input()
     if data == '1':
         # Set to current control mode
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 0)
+        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, CURRENT_CONTROL_MODE)
         # Set goal current
         packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_CURRENT, 6)
         print("Setting 6mA to Dynamixel")
     elif data == '2':
         # Set to position control mode
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 3)
+        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, POSITION_CONTROL_MODE)
         # Move to position 1800
         packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, 1800)
         print("Moving to position 1800")
     elif data == '3':
         # Set to position control mode
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 3)
+        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, POSITION_CONTROL_MODE)
         # Move to position 0
         packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, 0)
         print("Moving to position 0")
