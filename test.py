@@ -40,6 +40,10 @@ CURRENT_CONTROL_MODE = 0
 POSITION_CONTROL_MODE = 3
 VELOCITY_CONTROL_MODE = 1  # Added for velocity control
 
+# Goal settings for ID 7
+goal_current_mA = 6  # in mA
+goal_position_1 = 1800  # Example position
+
 # Velocity settings
 goal_velocity_forward = 200  # Positive for forward
 goal_velocity_backward = -200  # Negative for backward
