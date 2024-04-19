@@ -29,9 +29,8 @@ POSITION_CONTROL_MODE = 3                      # Position control mode
 EXTENDED_POSITION_CONTROL_MODE = 4             # Extended position control mode (Position + Current)
 
 # Goal settings
-goal_current_mA = 6                            # Goal current in mA (baseline current)
-spring_target_position = 1000                  # Target position for spring-like behavior
-stiffness = 0.1                                # Stiffness factor (mA per encoder unit deviation)
+goal_current_mA = 6                            # Goal current in mA
+goal_position = 1000                           # Target position
 
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
@@ -66,9 +65,6 @@ def set_goal_current(current):
 def set_goal_position(position):
     packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, position)
 
-def get_current_position():
-    return packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)[1]
-
 # Ensure Dynamixel has been successfully connected
 if enable_torque(TORQUE_ENABLE)[0] != COMM_SUCCESS:
     print("Failed to enable torque!")
@@ -76,20 +72,18 @@ if enable_torque(TORQUE_ENABLE)[0] != COMM_SUCCESS:
 
 print("Dynamixel has been successfully connected")
 
+set_operating_mode(EXTENDED_POSITION_CONTROL_MODE)  # Set to extended position control mode
+set_goal_position(goal_position)  # Set the target position
+set_goal_current(goal_current_mA)  # Set the current to maintain towards the target position
+
+print(f"Target position set to {goal_position}.")
+print(f"Current set to {goal_current_mA}mA.")
+
 try:
-    set_operating_mode(EXTENDED_POSITION_CONTROL_MODE)
-    set_goal_position(spring_target_position)  # Set the target position to aim for
-    print(f"Target position set to {spring_target_position}.")
-
     while True:
-        current_position = get_current_position()
-        position_error = spring_target_position - current_position
-        current_to_apply = goal_current_mA + int(stiffness * position_error)
-        set_goal_current(abs(current_to_apply))
-        print(f"Adjusted current to {current_to_apply}mA to maintain position at {spring_target_position}.")
-        if input("Press 'q' to quit or any other key to continue: ") == 'q':
+        print("Motor is operating. Press 'q' to quit:")
+        if input() == 'q':
             break
-
 finally:
     # Disable Torque on exit
     enable_torque(TORQUE_DISABLE)
