@@ -90,11 +90,12 @@ try:
                     set_operating_mode(DXL_ID_7, POSITION_CONTROL_MODE)
                     set_goal_position(DXL_ID_7, goal_position_1)
                     print(f"ID 7: Moving to position {goal_position_1}.")
-                elif joystick.get_button(13):  # D-pad Up
+            elif event.type == JOYHATMOTION:
+                if joystick.get_hat(0) == (0, 1):  # D-pad Up
                     set_goal_position(DXL_ID_5, 2048 + 512)
                     set_goal_position(DXL_ID_6, 2048 + 512)
                     print("Motors 5 and 6 are moving forward.")
-                elif joystick.get_button(14):  # D-pad Down
+                elif joystick.get_hat(0) == (0, -1):  # D-pad Down
                     set_goal_position(DXL_ID_5, 2048 - 512)
                     set_goal_position(DXL_ID_6, 2048 - 512)
                     print("Motors 5 and 6 are moving backward.")
