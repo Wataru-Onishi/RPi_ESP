@@ -27,6 +27,10 @@ TORQUE_DISABLE = 0                             # Value for disabling the torque
 CURRENT_CONTROL_MODE = 0                       # Current control mode
 POSITION_CONTROL_MODE = 3                      # Position control mode
 
+# Goal settings
+goal_current_mA = 5                            # Goal current in mA
+goal_position_1 = 1800                         # Goal position 1
+
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
 
@@ -69,20 +73,16 @@ print("Dynamixel has been successfully connected")
 
 try:
     while True:
-        print("Press 1 to set 6mA current, 2 to move to position 1800, 3 to move to position 0, or type 'exit' to exit.")
+        print(f"Press 1 to set {goal_current_mA}mA current, 2 to move to position {goal_position_1}, or type 'exit' to exit.")
         data = input()
         if data == '1':
             set_operating_mode(CURRENT_CONTROL_MODE)
-            set_goal_current(6)
-            print("6mA current set.")
+            set_goal_current(goal_current_mA)
+            print(f"{goal_current_mA}mA current set.")
         elif data == '2':
             set_operating_mode(POSITION_CONTROL_MODE)
-            set_goal_position(1800)
-            print("Moving to position 1800.")
-        elif data == '3':
-            set_operating_mode(POSITION_CONTROL_MODE)
-            set_goal_position(0)
-            print("Moving to position 0.")
+            set_goal_position(goal_position_1)
+            print(f"Moving to position {goal_position_1}.")
         elif data == 'exit':
             break
         else:
