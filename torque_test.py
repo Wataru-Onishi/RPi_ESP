@@ -19,7 +19,7 @@ PROTOCOL_VERSION = 2.0                         # See which protocol version is u
 # Default setting
 DXL_ID = 7                                     # Dynamixel ID : 7
 BAUDRATE = 57600                               # Dynamixel default baudrate : 57600
-DEVICENAME = '/dev/DYNAMIXEL'                  # Check which port is being used on your controller
+DEVICENAME = '/dev/DYNAMIXEL'                     # Typically /dev/ttyUSB0 for Linux or "COMx" for Windows
 
 TORQUE_ENABLE = 1                              # Value for enabling the torque
 TORQUE_DISABLE = 0                             # Value for disabling the torque
@@ -27,7 +27,8 @@ TORQUE_DISABLE = 0                             # Value for disabling the torque
 # Operating Modes
 EXTENDED_POSITION_CONTROL_MODE = 4             # Extended position control mode
 
-# Current settings
+# Position and current settings
+goal_position_target = 1000                    # Target position for the motor
 current_limit_mA = 6                           # Maximum current limit in mA
 
 # Initialize PortHandler instance
