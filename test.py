@@ -113,6 +113,12 @@ try:
                     set_goal_velocity(DXL_ID_5, goal_velocity_backward)
                     set_goal_velocity(DXL_ID_6, goal_velocity_backward)
                     print("Motors 5 and 6 are set to move backward at controlled speed.")
+                elif joystick.get_hat(0) == (1, 0):  # D-pad Right
+                    set_operating_mode(DXL_ID_5, VELOCITY_CONTROL_MODE)
+                    set_operating_mode(DXL_ID_6, VELOCITY_CONTROL_MODE)
+                    set_goal_velocity(DXL_ID_5, 0)  # Stop motor 5
+                    set_goal_velocity(DXL_ID_6, 0)  # Stop motor 6
+                    print("Braking Motors 5 and 6.")
             elif event.type == pygame.QUIT:
                 running = False
 finally:
