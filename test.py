@@ -26,7 +26,7 @@ PROTOCOL_VERSION = 2.0
 # Default setting
 DXL_ID = 7
 BAUDRATE = 57600
-DEVICENAME = '/dev/ttyUSB0'  # Check your port
+DEVICENAME = '/dev/DYNAMIXEL'  # Check your port
 
 TORQUE_ENABLE = 1
 TORQUE_DISABLE = 0
@@ -36,7 +36,7 @@ CURRENT_CONTROL_MODE = 0
 POSITION_CONTROL_MODE = 3
 
 # Goal settings
-goal_current_mA = 1000  # in mA
+goal_current_mA = 6  # in mA
 goal_position_1 = 1800  # Example position
 
 # Initialize PortHandler instance
