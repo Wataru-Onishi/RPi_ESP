@@ -1,36 +1,34 @@
 import os
-from dynamixel_sdk import *                    # Uses Dynamixel SDK library
+from dynamixel_sdk import *  # Uses Dynamixel SDK library
 
 # Control table address
-ADDR_OPERATING_MODE = 11                       # Operating mode address
-ADDR_TORQUE_ENABLE = 64                        # Torque enable address
-ADDR_GOAL_CURRENT = 102                        # Goal current address
-ADDR_GOAL_POSITION = 116                       # Goal position address
-ADDR_PRESENT_POSITION = 132                    # Address of current position
+ADDR_OPERATING_MODE = 11                      # Operating mode address
+ADDR_TORQUE_ENABLE = 64                       # Torque enable address
+ADDR_GOAL_CURRENT = 102                       # Goal current address
+ADDR_GOAL_POSITION = 116                      # Goal position address
+ADDR_PRESENT_POSITION = 132                   # Address of current position
 
 # Data Byte Length
 LEN_GOAL_CURRENT = 2
 LEN_GOAL_POSITION = 4
 
 # Protocol version
-PROTOCOL_VERSION = 2.0                         # See which protocol version is used in the Dynamixel
+PROTOCOL_VERSION = 2.0                        # See which protocol version is used in the Dynamixel
 
 # Default setting
-DXL_ID = 7                                     # Dynamixel ID : 7
-BAUDRATE = 57600                               # Dynamixel default baudrate : 57600
-DEVICENAME = '/dev/DYNAMIXEL'                  # Check which port is being used on your controller
+DXL_ID = 7                                    # Dynamixel ID: 7
+BAUDRATE = 57600                              # Dynamixel default baudrate: 57600
+DEVICENAME = '/dev/DYNAMIXEL'                 # Check which port is being used on your controller
 
-TORQUE_ENABLE = 1                              # Value for enabling the torque
-TORQUE_DISABLE = 0                             # Value for disabling the torque
+TORQUE_ENABLE = 1                             # Value for enabling the torque
+TORQUE_DISABLE = 0                            # Value for disabling the torque
 
 # Operating Modes
-CURRENT_CONTROL_MODE = 0                       # Current control mode
-POSITION_CONTROL_MODE = 3                      # Position control mode
-EXTENDED_POSITION_CONTROL_MODE = 4             # Extended position control mode (Position + Current)
+EXTENDED_POSITION_CONTROL_MODE = 4            # Extended position control mode
 
 # Goal settings
-goal_current_mA = 6                            # Goal current in mA
-goal_position = 1000                           # Target position
+goal_current_mA = 6                           # Goal current in mA
+goal_position_target = 1000                   # Target goal position
 
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
@@ -72,18 +70,19 @@ if enable_torque(TORQUE_ENABLE)[0] != COMM_SUCCESS:
 
 print("Dynamixel has been successfully connected")
 
-set_operating_mode(EXTENDED_POSITION_CONTROL_MODE)  # Set to extended position control mode
-set_goal_position(goal_position)  # Set the target position
-set_goal_current(goal_current_mA)  # Set the current to maintain towards the target position
-
-print(f"Target position set to {goal_position}.")
-print(f"Current set to {goal_current_mA}mA.")
-
 try:
     while True:
-        print("Motor is operating. Press 'q' to quit:")
-        if input() == 'q':
+        print(f"Press 1 to set current {goal_current_mA}mA and move to position {goal_position_target}, or type 'exit' to exit.")
+        data = input()
+        if data == '1':
+            set_operating_mode(EXTENDED_POSITION_CONTROL_MODE)
+            set_goal_position(goal_position_target)
+            set_goal_current(goal_current_mA)
+            print(f"Setting {goal_current_mA}mA current and moving to position {goal_position_target}.")
+        elif data == 'exit':
             break
+        else:
+            print("Invalid input. Please try again.")
 finally:
     # Disable Torque on exit
     enable_torque(TORQUE_DISABLE)
