@@ -101,7 +101,7 @@ try:
                     set_operating_mode(DXL_ID_7, POSITION_CONTROL_MODE)
                     set_goal_position(DXL_ID_7, goal_position_1)
                     print(f"ID 7: Moving to position {goal_position_1}.")
-                elif joystick.get_button(10):  # L1 button
+                elif joystick.get_button(4):  # L1 button
                     set_goal_velocity(DXL_ID_5, 0)  # Stop motor 5
                     set_goal_velocity(DXL_ID_6, 0)  # Stop motor 6
                     print("Braking Motors 5 and 6.")
