@@ -121,13 +121,13 @@ try:
                 elif joystick.get_hat(0) == (1, 0):  # D-pad Right
                     set_operating_mode(DXL_ID_5, VELOCITY_CONTROL_MODE)
                     set_operating_mode(DXL_ID_6, VELOCITY_CONTROL_MODE)
-                    set_goal_velocity(DXL_ID_5, -turning_velocity)  # Motor 5 turns backward
+                    set_goal_velocity(DXL_ID_5, turning_velocity)  # Motor 5 turns backward
                     set_goal_velocity(DXL_ID_6, turning_velocity)  # Motor 6 turns forward
                     print("Turning right with Motors 5 and 6.")
                 elif joystick.get_hat(0) == (-1, 0):  # D-pad Left
                     set_operating_mode(DXL_ID_5, VELOCITY_CONTROL_MODE)
                     set_operating_mode(DXL_ID_6, VELOCITY_CONTROL_MODE)
-                    set_goal_velocity(DXL_ID_5, turning_velocity)  # Motor 5 turns forward
+                    set_goal_velocity(DXL_ID_5, -turning_velocity)  # Motor 5 turns forward
                     set_goal_velocity(DXL_ID_6, -turning_velocity)  # Motor 6 turns backward
                     print("Turning left with Motors 5 and 6.")
             elif event.type == pygame.QUIT:
