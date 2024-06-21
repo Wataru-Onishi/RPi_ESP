@@ -45,9 +45,9 @@ goal_current_mA = 6  # in mA
 goal_position_1 = 1800  # Example position
 
 # Velocity settings for IDs 5 & 6
-goal_velocity_forward = 100  # Positive for forward
-goal_velocity_backward = -100  # Negative for backward
-turning_velocity = 100  # Velocity for turning
+goal_velocity_forward = 200  # Positive for forward
+goal_velocity_backward = -200  # Negative for backward
+turning_velocity = 200  # Velocity for turning
 
 # Initialize PortHandler instance
 portHandler = PortHandler(DEVICENAME)
