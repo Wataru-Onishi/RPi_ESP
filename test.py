@@ -41,7 +41,7 @@ POSITION_CONTROL_MODE = 3
 VELOCITY_CONTROL_MODE = 1  # For velocity control
 
 # Goal settings for ID 7
-goal_current_mA = 6  # in mA
+goal_current_mA = 3  # in mA
 goal_position_1 = 1800  # Example position
 
 # Velocity settings for IDs 5 & 6
