@@ -45,7 +45,7 @@ goal_current_mA = 3  # in mA
 goal_position_1 = 1800  # Example position
 
 # Velocity settings for IDs 5 & 6
-set_velocity = 250
+set_velocity = 200
 goal_velocity_forward = set_velocity  # Positive for forward
 goal_velocity_backward = -1 * set_velocity  # Negative for backward
 turning_velocity = 100  # Velocity for turning
