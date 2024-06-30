@@ -106,7 +106,7 @@ try:
                     set_goal_velocity(DXL_ID_5, 0)  # Stop motor 5
                     set_goal_velocity(DXL_ID_6, 0)  # Stop motor 6
                     print("Braking Motors 5 and 6.")
-                elif joystick.get_button(12):  # PS button
+                elif joystick.get_button(13):  # PS button
                     print("PS button pressed. Exiting program.")
                     running = False
             elif event.type == JOYHATMOTION:
