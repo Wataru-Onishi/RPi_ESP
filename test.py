@@ -45,7 +45,7 @@ goal_current_mA = 3  # in mA
 goal_position_1 = 1800  # Example position
 
 # Velocity settings for IDs 5 & 6
-set_velocity = 300
+set_velocity = 250
 goal_velocity_forward = set_velocity  # Positive for forward
 goal_velocity_backward = -1 * set_velocity  # Negative for backward
 turning_velocity = 100  # Velocity for turning
@@ -106,6 +106,9 @@ try:
                     set_goal_velocity(DXL_ID_5, 0)  # Stop motor 5
                     set_goal_velocity(DXL_ID_6, 0)  # Stop motor 6
                     print("Braking Motors 5 and 6.")
+                elif joystick.get_button(13):  # PS button
+                    print("PS button pressed. Exiting program.")
+                    running = False
             elif event.type == JOYHATMOTION:
                 if joystick.get_hat(0) == (0, 1):  # D-pad Up
                     set_operating_mode(DXL_ID_5, VELOCITY_CONTROL_MODE)
